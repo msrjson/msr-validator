@@ -1,0 +1,36 @@
+# The canonical schema is bundled at build time from a pinned release tag of
+# msr-standard/specification and must never be committed here. A hand-maintained
+# copy of the schema once drifted 81 ways under the same version number.
+/src/**/schemas/*.json
+
+# Python build and tooling artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.log
+
+# Workstation-local editor state
+.vscode/
+*.code-workspace
+
+# Secrets by EXTENSION rather than by filename: a per-file rule elsewhere let
+# through a token that arrived after the rule was written.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.token
+
+# Credentials dropped next to the CI, which IS versioned. Never ignore all of
+# .github/: a blanket rule silently excluded every workflow elsewhere.
+.github/api-key
