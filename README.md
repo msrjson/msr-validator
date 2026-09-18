@@ -1,3 +1,4 @@
+<!-- version: 1.0.0 | build: 2026-09-18 | update: 2026-09-18 -->
 # msr-validator
 
 The reference validator library for [MSR JSON](https://github.com/msr-standard/specification)
