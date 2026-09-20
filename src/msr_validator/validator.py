@@ -22,6 +22,10 @@ class ValidationError:
     message: str
 
 
+class DuplicateKeyError(ValueError):
+    """Raised when JSON contains an ambiguous duplicate object member."""
+
+
 @dataclass(frozen=True)
 class ValidationResult:
     """The outcome of validating one manifest."""
@@ -35,11 +39,20 @@ class ValidationResult:
 
 def _schema() -> dict[str, Any]:
     payload = files("msr_validator").joinpath("schema", "msr-2.0.json").read_text(encoding="utf-8")
-    schema = json.loads(payload)
+    schema = json.loads(payload, object_pairs_hook=_reject_duplicate_keys)
     if schema.get("$id") != SCHEMA_ID:
         raise RuntimeError("bundled schema does not have the canonical MSR JSON 2.0 identifier")
     Draft202012Validator.check_schema(schema)
     return schema
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateKeyError(f"duplicate JSON object member: {key!r}")
+        result[key] = value
+    return result
 
 
 _VALIDATOR = Draft202012Validator(_schema())
@@ -56,7 +69,7 @@ def _load_manifest(manifest: Mapping[str, Any] | str | bytes | Path) -> Mapping[
         content = manifest
     else:
         raise TypeError("manifest must be a mapping, JSON text, bytes, or pathlib.Path")
-    loaded = json.loads(content)
+    loaded = json.loads(content, object_pairs_hook=_reject_duplicate_keys)
     if not isinstance(loaded, Mapping):
         raise ValueError("manifest root must be a JSON object")
     return loaded
