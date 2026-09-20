@@ -1,0 +1,20 @@
+{
+  "$schema": "https://msrjson.org/schemas/msr-2.0.json",
+  "protocol": {
+    "name": "MSR JSON",
+    "version": "2.0.0",
+    "author": "Antonio Santos",
+    "specification_license": "CC-BY-4.0",
+    "reference_implementation_license": "MIT",
+    "canonical_url": "https://example.org/.well-known/msr.json"
+  },
+  "entity": {
+    "name": "Example",
+    "slug": "example",
+    "domain": "example.org",
+    "type": "saas",
+    "descriptions": {"en": {"summary": "A valid MSR JSON reference fixture."}}
+  },
+  "capabilities": {"deployment": ["cloud"]},
+  "releases": {"latest": {"version": "1.0.0", "published_at": "2026-09-20T00:00:00Z", "release_type": "major"}}
+}
