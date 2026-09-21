@@ -59,3 +59,12 @@ MSR JSON was created by Antonio Santos. See the
 
 [MIT](LICENSE). The specification and schemas it validates against are
 CC-BY-4.0, in the specification repository.
+
+## Experimental MSR JSON 2.1 validation
+
+Until 2.1 is ratified and pinned, pass the local draft schema explicitly.
+The default remains the bundled MSR JSON 2.0 schema.
+
+```python
+result = validate(manifest, schema_path="path/to/msr-2.1-draft.json")
+```

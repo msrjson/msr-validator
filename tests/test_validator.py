@@ -30,3 +30,25 @@ def test_duplicate_json_keys_are_rejected_before_schema_validation():
     )
     with pytest.raises(ValueError, match="duplicate JSON object member"):
         validate(raw)
+
+
+def test_explicit_v21_draft_schema_accepts_new_fields():
+    draft = Path(__file__).resolve().parents[2] / "msr-standard/spec/schemas/msr-2.1-draft.json"
+    if not draft.exists():
+        pytest.skip("specification checkout unavailable")
+    manifest = json.loads(EXAMPLE.read_text())
+    manifest["$schema"] = "https://msrjson.org/schemas/msr-2.1-draft.json"
+    manifest["entity"]["media"] = {"screenshots": [{"url": "https://example.com/screen.png"}]}
+    manifest["distribution"] = {"package_managers": {"pypi": "example"}}
+    manifest["capabilities"]["requirements"] = {"architectures": ["arm64"]}
+    assert validate(manifest, schema_path=draft).valid
+    assert not validate(manifest).valid
+
+
+def test_explicit_schema_must_match_manifest_identifier():
+    draft = Path(__file__).resolve().parents[2] / "msr-standard/spec/schemas/msr-2.1-draft.json"
+    if not draft.exists():
+        pytest.skip("specification checkout unavailable")
+    result = validate(EXAMPLE, schema_path=draft)
+    assert not result.valid
+    assert result.errors[0].path == "/$schema"

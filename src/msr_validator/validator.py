@@ -75,15 +75,26 @@ def _load_manifest(manifest: Mapping[str, Any] | str | bytes | Path) -> Mapping[
     return loaded
 
 
-def validate(manifest: Mapping[str, Any] | str | bytes | Path) -> ValidationResult:
-    """Validate a manifest against the bundled, pinned MSR JSON 2.0 schema."""
+def validate(
+    manifest: Mapping[str, Any] | str | bytes | Path,
+    *,
+    schema_path: str | Path | None = None,
+) -> ValidationResult:
+    """Validate against pinned 2.0, or an explicit local draft schema."""
 
     data = _load_manifest(manifest)
+    validator = _VALIDATOR
+    if schema_path is not None:
+        schema = json.loads(Path(schema_path).read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_keys)
+        Draft202012Validator.check_schema(schema)
+        if data.get("$schema") != schema.get("$id"):
+            return ValidationResult((ValidationError("/$schema", "manifest $schema does not match selected schema $id"),))
+        validator = Draft202012Validator(schema)
     errors = tuple(
         ValidationError(
             path="/" + "/".join(map(str, error.absolute_path)) if error.absolute_path else "/",
             message=error.message,
         )
-        for error in sorted(_VALIDATOR.iter_errors(data), key=lambda error: list(error.absolute_path))
+        for error in sorted(validator.iter_errors(data), key=lambda error: list(error.absolute_path))
     )
     return ValidationResult(errors)
